@@ -140,4 +140,4 @@ if __name__ == "__main__":
     schedule_alerts()
     user_proxy.initiate_chat(alert_agent, message="Check alerts for BTC")
     while True:
-        time.sleep(60)  # Keep sc
+        time.sleep(60)  # Keep schuidhydshygyvhdvhgydygvgydygvgyudsygy8vdsygydsvyuhvdsiuhdscuyguyvdsg
