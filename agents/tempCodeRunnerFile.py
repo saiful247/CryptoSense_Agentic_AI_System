@@ -1,2 +1,2 @@
-    # is_termination_msg=lambda msg: msg.get(
-    #     "content") is not None and "TERMINATE" in msg["content"], 
+        final_output=CryptoPriceAgentResponse(**final_result)
+        print("Pydantic Schema successfully parsed: ", final_output)

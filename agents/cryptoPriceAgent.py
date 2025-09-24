@@ -38,6 +38,7 @@ headers = {
     "X-CMC_PRO_API_KEY": coinMarketCap_api_key
 }
 
+# def getCryptoPrice(prompt:str)->str:
 
 def cryptoPriceTool(coinSymbol: str) -> str:
     """This agent is used to get the price info about a specific coin"""
@@ -74,11 +75,11 @@ steps to follow:
 2. then you need to call the cryptoPriceTool with the coin symbol to get the price.
 3. then cryptoPriceTool will return a JSON string with the price data.
 4. then you need to parse the JSON string and extract the following fields:
-   - current_price
-   - percent_change_1h
-   - percent_change_24h
-   - percent_change_7d
-   - percent_change_30d
+- current_price
+- percent_change_1h
+- percent_change_24h
+- percent_change_7d
+- percent_change_30d
 5. the you need to give the price to the user like below JSON format:
     {{
         summary: "The current price of Bitcoin is $4342.08, with a 1-hour change of 0.14%, a 24-hour change of -3.41%, and a 7-day change of -9.47%. The market cap is $524119084067.21 and the volume in the last 24 hours is $46773360124.46.",
@@ -135,25 +136,26 @@ Arguments:
 {"coinSymbol": "BTC"}
 
 {
-  "name": "cryptoPriceTool",
-  "description": "Fetches the latest price and market data for a specified cryptocurrency symbol (e.g., BTC for Bitcoin, ETH for Ethereum).",
-  "parameters": {
+"name": "cryptoPriceTool",
+"description": "Fetches the latest price and market data for a specified cryptocurrency symbol (e.g., BTC for Bitcoin, ETH for Ethereum).",
+"parameters": {
     "type": "object",
     "properties": {
-      "coinSymbol": {
+    "coinSymbol": {
         "type": "string",
         "description": ""
-      }
+    }
     },
     "required": ["coinSymbol"]
-  }
+}
 }
 
 """
 
+prompt="I need the price of Solana"
 
 result = user_proxy.initiate_chat(
-    cryptoPriceAgent, message="give me price of bitcoin")
+    cryptoPriceAgent, message=prompt)
 
 
 final_text= result.chat_history[3].get("content","")
@@ -165,15 +167,18 @@ try:
     final_text = re.sub(r"\s*TERMINATE\s*$","", final_text)
     print("After cleaning: ", final_text)
     final_result = json.loads(final_text)
+    # final_result=final_text
     try: 
         print("Final Result XX str: ", final_result)
-        final_output=CryptoPriceAgentResponse(**final_result)
-        print("Pydantic Schema successfully parsed: ", final_output)
+        # final_output=CryptoPriceAgentResponse(**final_result)
+        # print("Pydantic Schema successfully parsed: ", final_output)
+        # return final_output
+        # return final_result
     except Exception as e:
         print("Error in parsing to pydantic model: ", str(e))
-        final_output=final_result
-        print("Final Result 008: ", final_output)
+        # return {"Error": str(e)}
 except Exception as e:
     final_result = {"raw": final_text}
     print("Error in processing final result: ", str(e))
+    # return {"Error": str(e)}
 

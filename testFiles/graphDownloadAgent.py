@@ -56,6 +56,8 @@ def createPriceChangeChart(price_data: str) -> str:
     """Create a bar chart of price changes from the current data and save as PNG."""
     try:
         data = json.loads(price_data)
+        print("Data in createPriceChangeChart: ", data)
+        print("1h data: ", data.get('percent_change_1h', 0))
         changes = {
             '1h': data.get('percent_change_1h', 0),
             '24h': data.get('percent_change_24h', 0),
@@ -73,7 +75,7 @@ def createPriceChangeChart(price_data: str) -> str:
         plt.title('Current Price Changes')
         plt.grid(True)
 
-        chart_path = 'price_changes.png'
+        chart_path = f'E:\\IRWA\\Project\\CryptoAgent\\cryptoGraph\\price_changes_{pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")}.png'
         plt.savefig(chart_path)
         plt.close()
 
@@ -82,39 +84,24 @@ def createPriceChangeChart(price_data: str) -> str:
         return f"Error creating chart: {str(e)}"
 
 
-def process_crypto_request(crypto_name):
-    # Map common crypto names to their symbols
-    crypto_map = {
-        "bitcoin": "BTC",
-        "ethereum": "ETH",
-        "litecoin": "LTC",
-        "dogecoin": "DOGE",
-        # Add more mappings as needed
-    }
-    
-    # Convert to lowercase for case-insensitive matching
-    crypto_name_lower = crypto_name.lower()
-    
-    # Get the symbol (or use the input if not in our map)
-    symbol = crypto_map.get(crypto_name_lower, crypto_name.upper())
-    
-    print(f"Processing request for {crypto_name} (Symbol: {symbol})")
-    
-    # Step 1: Get price data
-    price_data = cryptoPriceTool(symbol)
-    if price_data == "ERROR":
-        return f"Failed to get price data for {crypto_name}"
-    
-    # Step 2: Create chart
-    chart_path = createPriceChangeChart(price_data)
-    
-    return f"Created price change chart for {crypto_name} at: {chart_path}"
-
-
 statsAgentInstruction = """
-You are an agent that provides information about cryptocurrency statistics.
-Your role is to interpret user requests about crypto price graphs and call the appropriate
-processing function.
+You are an agent that provides cryptocurrency price change graphs.
+Here are the main steps, ALL OF WHICH MUST BE COMPLETED IN ORDER:
+1. first you need to convert the user query into a coin symbol. for example if user query is "give me price of bitcoin" then the coin symbol is "BTC"
+2. then you need to call the cryptoPriceTool with the coin symbol to get the price.
+3. then cryptoPriceTool will return a JSON string with the price data.
+4. then you need to parse the JSON string and extract the following fields:
+   - current_price
+   - percent_change_1h
+   - percent_change_24h
+   - percent_change_7d
+   - percent_change_30d
+   - percent_change_60d
+   - percent_change_90d
+5.then you need to use the createPriceChangeChart Tool with the above fields to create the chart.
+6. Finally, if succesfully created the chart respond as "SAVED_SUCCESSFULLY".
+
+YOU MUST PERFORM ALL STEPS IN SEQUENCE, DO NOT STOP AFTER JUST GETTING THE PRICE DATA.
 """
 
 statsAgent = ConversableAgent(
@@ -123,40 +110,38 @@ statsAgent = ConversableAgent(
     llm_config={
         "config_list": config_list
     },
+    max_consecutive_auto_reply=2,
+    human_input_mode="NEVER",
 )
 
 user_proxy = ConversableAgent(
     "user_proxy",
     llm_config=False,
     human_input_mode="NEVER",
-    is_termination_msg=lambda msg: msg.get("content") is not None and "TERMINATE" in msg["content"],
+    is_termination_msg=lambda msg: msg.get(
+        "content") is not None and "SAVED_SUCCESSFULLY" in msg["content"],
 )
 
-def handle_crypto_graph_request(message: str) -> str:
-    # Extract the crypto name from the message
-    # This is a simple implementation - in a real app you might want more sophisticated NLP
-    if "bitcoin" in message.lower():
-        return process_crypto_request("Bitcoin")
-    elif "ethereum" in message.lower():
-        return process_crypto_request("Ethereum")
-    elif "litecoin" in message.lower():
-        return process_crypto_request("Litecoin")
-    elif "dogecoin" in message.lower():
-        return process_crypto_request("Dogecoin")
-    else:
-        # Default to Bitcoin if no specific crypto mentioned
-        return process_crypto_request("Bitcoin")
-
 register_function(
-    handle_crypto_graph_request,
+    f=cryptoPriceTool,
     caller=statsAgent,
     executor=user_proxy,
-    name="handleCryptoGraphRequest",
-    description="Processes a request for a cryptocurrency price graph"
+    name="cryptoPriceTool",
+    description="Uses CoinMarketCap API to fetch current coin data"
+)
+
+register_function(
+    createPriceChangeChart,
+    caller=statsAgent,
+    executor=user_proxy,
+    name="createPriceChangeChart",
+    description="Creates a bar chart of price changes from current data and saves as PNG"
 )
 
 # Example initiation
-user_proxy.initiate_chat(
+result = user_proxy.initiate_chat(
     statsAgent,
-    message="Give me price graph about Bitcoin"
+    message="Give me price graph about Solana"
 )
+
+print("Chat History: ", result.chat_history)
