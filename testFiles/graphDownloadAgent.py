@@ -95,7 +95,7 @@ Here are the main steps, ALL OF WHICH MUST BE COMPLETED IN ORDER:
    - percent_change_1h
    - percent_change_24h
    - percent_change_7d
-   - percent_change_30d
+
    - percent_change_60d
    - percent_change_90d
 5.then you need to use the createPriceChangeChart Tool with the above fields to create the chart.
