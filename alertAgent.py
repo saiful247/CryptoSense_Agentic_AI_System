@@ -15,7 +15,7 @@ load_dotenv()
 # Configure logging for better debugging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# API Configuration
+# API Configuration 
 config_list = [
     {
         "model": "gemini-2.5-flash",
@@ -27,7 +27,7 @@ coinMarketCap_api_key = os.getenv("COINMARKETCAP_API_KEY")
 url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
 headers = {"X-CMC_PRO_API_KEY": coinMarketCap_api_key}
 
-# Database setup
+# Database setup for storing price history
 def init_db():
     conn = sqlite3.connect('crypto_alerts.db')
     cursor = conn.cursor()
@@ -42,7 +42,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Fetch crypto price
+# Fetch crypto price from CoinMarketCap
 def get_crypto_price(crypto: str) -> float | None:
     params = {"symbol": crypto.upper(), "convert": "USD"}
     try:
