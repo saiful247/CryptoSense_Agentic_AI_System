@@ -66,7 +66,7 @@ def store_price(crypto: str, price: float):
     conn.commit()
     conn.close()
 
-# Get previous price
+# Get previous price from database
 def get_previous_price(crypto: str) -> float | None:
     conn = sqlite3.connect('crypto_alerts.db')
     cursor = conn.cursor()
@@ -140,4 +140,4 @@ if __name__ == "__main__":
     schedule_alerts()
     user_proxy.initiate_chat(alert_agent, message="Check alerts for BTC")
     while True:
-        time.sleep(60)  # Keep script running
+        time.sleep(60)  # Keep script
