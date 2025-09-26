@@ -56,7 +56,7 @@ def get_crypto_price(crypto: str) -> float | None:
         logging.error(f"Error fetching price for {crypto}: {e}")
         return None
 
-# Store price in database
+# Store price in database for history
 def store_price(crypto: str, price: float):
     conn = sqlite3.connect('crypto_alerts.db')
     cursor = conn.cursor()
