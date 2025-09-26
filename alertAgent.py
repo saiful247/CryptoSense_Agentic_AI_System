@@ -9,10 +9,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import logging
 import time
 
-# Load environment variables 
+# Load environment variables from .env file
 load_dotenv()
 
-# Configure logging
+# Configure logging for better debugging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # API Configuration
