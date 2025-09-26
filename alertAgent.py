@@ -76,7 +76,7 @@ def get_previous_price(crypto: str) -> float | None:
     conn.close()
     return result[0] if result else None
 
-# Check price and trigger alerts
+# Check price and trigger alerts based on threshold
 def check_price_alerts(crypto: str, threshold: float = 0.1) -> str:
 
     current_price = get_crypto_price(crypto)
@@ -98,7 +98,7 @@ def check_price_alerts(crypto: str, threshold: float = 0.1) -> str:
         return message
     return f"No significant change for {crypto.upper()} (change: {percent_change:.2f}%)."
 
-# Agent configuration
+# Agent configuration and setup
 alert_agent_instruction = """
 You are a crypto price alert agent. You monitor cryptocurrency prices and notify users of significant changes (>5% by default).
 Use the check_price_alerts tool to check prices and provide alerts. Reply TERMINATE when the task is done or no alerts are needed.
