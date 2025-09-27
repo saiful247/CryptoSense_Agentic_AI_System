@@ -90,3 +90,78 @@ def generate_question_from_news(news_item: dict) -> dict:
         }
     ]
     return random.choice(mock_questions)
+
+# Update user progress
+def update_progress(user_id: int, correct: bool):
+    conn = sqlite3.connect('quiz_progress.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT quizzes_completed, badges FROM user_progress WHERE user_id = ?', (user_id,))
+    result = cursor.fetchone()
+    if result:
+        quizzes_completed, badges = result
+        quizzes_completed += 1
+        new_badges = badges.split(",") if badges else []
+        if quizzes_completed == 5 and "Crypto Novice" not in new_badges:
+            new_badges.append("Crypto Novice")
+        cursor.execute('UPDATE user_progress SET quizzes_completed = ?, badges = ? WHERE user_id = ?',
+                      (quizzes_completed, ",".join(new_badges), user_id))
+    else:
+        cursor.execute('INSERT INTO user_progress (user_id, quizzes_completed, badges) VALUES (?, ?, ?)',
+                      (user_id, 1, "Crypto Novice" if correct else ""))
+    conn.commit()
+    conn.close()
+
+# Conduct quiz with news-based question (avoid repeats)
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10), retry=retry_if_exception_type(Exception))
+def conduct_quiz(user_id: int) -> str:
+    news_items = fetch_recent_news()
+    if not news_items:
+        return "No recent news available. Try again later."
+    
+    conn = sqlite3.connect('quiz_progress.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT news_title FROM asked_questions WHERE user_id = ?', (user_id,))
+    asked_titles = [row[0] for row in cursor.fetchall()]
+    available_news = [item for item in news_items if item['title'] not in asked_titles]
+    if not available_news:
+        available_news = news_items  # Reset if all asked
+    
+    news_item = random.choice(available_news)
+    question_data = generate_question_from_news(news_item)
+    response = f"News-based Question: {question_data['question']}\nOptions: {', '.join(question_data['options'])}\nBased on recent news: {news_item['title']}\nPlease select A, B, C, or D."
+    
+    cursor.execute('INSERT INTO asked_questions (user_id, news_title) VALUES (?, ?)', (user_id, news_item['title']))
+    conn.commit()
+    conn.close()
+    
+    return json.dumps({"response": response, "question_data": question_data, "news_item": news_item})
+
+# Check answer and provide feedback with news explanation
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10), retry=retry_if_exception_type(Exception))
+def check_answer(user_id: int, answer: str, question_json: str) -> str:
+    try:
+        data = json.loads(question_json.replace('\\u', 'u').replace('\\', '\\\\'))  # Clean invalid escapes
+        question_data = data["question_data"]
+        news_item = data["news_item"]
+        correct = answer.upper() == question_data['answer']
+        update_progress(user_id, correct)
+        conn = sqlite3.connect('quiz_progress.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT quizzes_completed, badges FROM user_progress WHERE user_id = ?', (user_id,))
+        result = cursor.fetchone()
+        conn.close()
+        quizzes_completed, badges = result if result else (0, "")
+        badges_list = badges.split(",") if badges else []
+        
+        feedback = f"{'Correct!' if correct else f'Incorrect. The correct answer is {question_data['answer']}: {question_data['options'][ord(question_data['answer']) - ord('A')]}'}\n"
+        feedback += f"Explanation: {question_data['explanation'].replace('\\n', ' ').replace('\\r', ' ').strip()}\n"
+        feedback += f"Full News Context: {news_item['description'].replace('\\n', ' ').replace('\\r', ' ').strip()} (Source: {news_item['url']})\n"
+        feedback += f"Quizzes completed: {quizzes_completed}. Badges: {', '.join(badges_list) if badges_list else 'None'}\n"
+        feedback += "Would you like another quiz? (Yes/No)"
+        return feedback
+    except json.JSONDecodeError as e:
+        logging.error(f"JSON decoding error: {e}")
+        return f"Error processing your answer. Please try again. Details: {str(e)}\nWould you like another quiz? (Yes/No)"
+    except Exception as e:
+        logging.error(f"Unexpected error in check_answer: {e}")
+        return f"Service unavailable. Please try again later. Details: {str(e)}\nWould you like another quiz? (Yes/No)"
