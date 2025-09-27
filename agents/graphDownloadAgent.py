@@ -5,6 +5,8 @@ import requests
 import json
 import matplotlib.pyplot as plt
 import pandas as pd
+from google.cloud import storage
+import io
 
 load_dotenv()
 
@@ -75,73 +77,90 @@ def createPriceChangeChart(price_data: str) -> str:
         plt.title('Current Price Changes')
         plt.grid(True)
 
-        chart_path = f'E:\\IRWA\\Project\\CryptoAgent\\cryptoGraph\\price_changes_{pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")}.png'
-        plt.savefig(chart_path)
+        # Create a BytesIO object to hold the image data
+        img_byte_arr = io.BytesIO()
+        plt.savefig(img_byte_arr, format='PNG')
+        img_byte_arr.seek(0)
         plt.close()
 
-        return os.path.abspath(chart_path)
+        # Upload to GCP bucket
+        bucket_name = "crypto-agent-irwa"
+        blob_name = f"crypto_images/price_changes_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.png"
+
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(blob_name)
+
+        blob.upload_from_file(img_byte_arr, content_type="image/png")
+
+        gcs_uri = f"https://storage.googleapis.com/{bucket_name}/{blob_name}"
+        return gcs_uri
     except Exception as e:
         return f"Error creating chart: {str(e)}"
 
 
-statsAgentInstruction = """
-You are an agent that provides cryptocurrency price change graphs.
-Here are the main steps, ALL OF WHICH MUST BE COMPLETED IN ORDER:
-1. first you need to convert the user query into a coin symbol. for example if user query is "give me price of bitcoin" then the coin symbol is "BTC"
-2. then you need to call the cryptoPriceTool with the coin symbol to get the price.
-3. then cryptoPriceTool will return a JSON string with the price data.
-4. then you need to parse the JSON string and extract the following fields:
-   - current_price
-   - percent_change_1h
-   - percent_change_24h
-   - percent_change_7d
-   - percent_change_30d
-   - percent_change_60d
-   - percent_change_90d
-5.then you need to use the createPriceChangeChart Tool with the above fields to create the chart.
-6. Finally, if succesfully created the chart respond as "SAVED_SUCCESSFULLY".
+def getCryptoStats(userInput: str) -> str:
+    statsAgentInstruction = """
+    You are an agent that provides cryptocurrency price change graphs.
+    Here are the main steps, ALL OF WHICH MUST BE COMPLETED IN ORDER:
+    1. first you need to convert the user query into a coin symbol. for example if user query is "give me price of bitcoin" then the coin symbol is "BTC"
+    2. then you need to call the cryptoPriceTool with the coin symbol to get the price.
+    3. then cryptoPriceTool will return a JSON string with the price data.
+    4. then you need to parse the JSON string and extract the following fields:
+    - current_price
+    - percent_change_1h
+    - percent_change_24h
+    - percent_change_7d
+    - percent_change_30d
+    - percent_change_60d
+    - percent_change_90d
+    5.then you need to use the createPriceChangeChart Tool with the above fields to create the chart.
+    6. Finally, if succesfully created the chart respond as "SAVED_SUCCESSFULLY".
 
-YOU MUST PERFORM ALL STEPS IN SEQUENCE, DO NOT STOP AFTER JUST GETTING THE PRICE DATA.
-"""
+    YOU MUST PERFORM ALL STEPS IN SEQUENCE, DO NOT STOP AFTER JUST GETTING THE PRICE DATA.
+    """
 
-statsAgent = ConversableAgent(
-    "crypto_stat_agent",
-    system_message=statsAgentInstruction,
-    llm_config={
-        "config_list": config_list
-    },
-    max_consecutive_auto_reply=2,
-    human_input_mode="NEVER",
-)
+    statsAgent = ConversableAgent(
+        "crypto_stat_agent",
+        system_message=statsAgentInstruction,
+        llm_config={
+            "config_list": config_list
+        },
+        max_consecutive_auto_reply=2,
+        human_input_mode="NEVER",
+    )
 
-user_proxy = ConversableAgent(
-    "user_proxy",
-    llm_config=False,
-    human_input_mode="NEVER",
-    is_termination_msg=lambda msg: msg.get(
-        "content") is not None and "SAVED_SUCCESSFULLY" in msg["content"],
-)
+    user_proxy = ConversableAgent(
+        "user_proxy",
+        llm_config=False,
+        human_input_mode="NEVER",
+        is_termination_msg=lambda msg: msg.get(
+            "content") is not None and "SAVED_SUCCESSFULLY" in msg["content"],
+    )
 
-register_function(
-    f=cryptoPriceTool,
-    caller=statsAgent,
-    executor=user_proxy,
-    name="cryptoPriceTool",
-    description="Uses CoinMarketCap API to fetch current coin data"
-)
+    register_function(
+        f=cryptoPriceTool,
+        caller=statsAgent,
+        executor=user_proxy,
+        name="cryptoPriceTool",
+        description="Uses CoinMarketCap API to fetch current coin data"
+    )
 
-register_function(
-    createPriceChangeChart,
-    caller=statsAgent,
-    executor=user_proxy,
-    name="createPriceChangeChart",
-    description="Creates a bar chart of price changes from current data and saves as PNG"
-)
+    register_function(
+        createPriceChangeChart,
+        caller=statsAgent,
+        executor=user_proxy,
+        name="createPriceChangeChart",
+        description="Creates a bar chart of price changes from current data and saves as PNG"
+    )
 
-# Example initiation
-result = user_proxy.initiate_chat(
-    statsAgent,
-    message="Give me price graph about Solana"
-)
+    result = user_proxy.initiate_chat(
+        statsAgent,
+        # message="give me the price change chart of Solana",
+        message=userInput
+    )
 
-print("Chat History: ", result.chat_history)
+    print("Chat History: ", result.chat_history[-1].get("content", ''))
+
+    imageURL = result.chat_history[-1].get("content", '')
+    return imageURL
