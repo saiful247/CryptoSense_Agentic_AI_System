@@ -165,3 +165,48 @@ def check_answer(user_id: int, answer: str, question_json: str) -> str:
     except Exception as e:
         logging.error(f"Unexpected error in check_answer: {e}")
         return f"Service unavailable. Please try again later. Details: {str(e)}\nWould you like another quiz? (Yes/No)"
+
+# Agent configuration
+quiz_agent_instruction = """
+You are a Crypto Educational Quiz Agent. Engage users with quizzes based on current news about cryptocurrency concepts, market trends, and trading basics.
+Fetch recent news to generate dynamic questions. Use conduct_quiz to present a news-based question and check_answer to evaluate responses with news-tied explanations.
+Track user progress and award badges (e.g., 'Crypto Novice' at 5 quizzes).
+Reply TERMINATE when the user declines another quiz or the session ends.
+Parse JSON from tools for question data and news context.
+Handle errors gracefully with retries and suggest retries if needed.
+"""
+
+quiz_agent = ConversableAgent(
+    "crypto_quiz_agent",
+    system_message=quiz_agent_instruction,
+    llm_config={"config_list": config_list},
+    is_termination_msg=lambda msg: msg.get("content") is not None and "TERMINATE" in msg["content"],
+)
+
+user_proxy = ConversableAgent(
+    "user_proxy",
+    llm_config=False,
+    human_input_mode="ALWAYS",  # ALWAYS for interactive answers
+    is_termination_msg=lambda msg: msg.get("content") is not None and "TERMINATE" in msg["content"],
+)
+
+# Register functions
+register_function(
+    conduct_quiz,
+    caller=quiz_agent,
+    executor=user_proxy,
+    name="conduct_quiz",
+    description="Generates and presents a news-based cryptocurrency quiz question with options as JSON"
+)
+
+register_function(
+    check_answer,
+    caller=quiz_agent,
+    executor=user_proxy,
+    name="check_answer",
+    description="Evaluates user's answer using JSON-encoded question data and provides news-based feedback"
+)
+
+if __name__ == "__main__":
+    init_db()
+    user_proxy.initiate_chat(quiz_agent, message="Start a quiz for user 1")
