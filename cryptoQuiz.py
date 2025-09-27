@@ -70,3 +70,23 @@ def fetch_recent_news() -> list:
             {"title": "DeFi Hacks Rise in Q3", "description": "Security concerns in lending protocols highlighted.", "url": "https://example.com/defi-hacks"}
         ]
 
+# Generate question from a news item
+def generate_question_from_news(news_item: dict) -> dict:
+    title = news_item['title'].replace('"', '').replace('\\', '')
+    description = news_item['description'].replace('"', '').replace('\\', '').replace('\u2026', '...').replace('\u2013', '-').replace('\u2019', "'").replace('\u2018', "'")
+    
+    mock_questions = [
+        {
+            "question": f"What is the main event in '{title}'?",
+            "options": [f"A) {description[:50]}...", "B) Price drop", "C) Regulatory ban", "D) New exchange launch"],
+            "answer": "A",
+            "explanation": f"According to the news: {description}. Source: {news_item['url']}"
+        },
+        {
+            "question": f"Which factor is highlighted in '{title}'?",
+            "options": ["A) Market crash", f"B) {description[:50]}...", "C) Bull run", "D) Stablecoin adoption"],
+            "answer": "B",
+            "explanation": f"The news discusses: {description}. Source: {news_item['url']}"
+        }
+    ]
+    return random.choice(mock_questions)
