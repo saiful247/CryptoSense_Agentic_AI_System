@@ -100,7 +100,7 @@ def check_price_alerts(crypto: str, threshold: float = 0.1) -> str:
 
 # Agent configuration and setup
 alert_agent_instruction = """
-You are a crypto price alert agent. You monitor cryptocurrency prices and notify users of significant changes (>5% by default).
+You are a crypto price alert agent. You monitor cryptocurrency prices and notify users of significant changes (>0.1% by default).
 Use the check_price_alerts tool to check prices and provide alerts. Reply TERMINATE when the task is done or no alerts are needed.
 If an error occurs, inform the user and suggest trying again later. Ignore empty messages and continue monitoring.
 """
@@ -125,14 +125,14 @@ register_function(
     caller=alert_agent,
     executor=user_proxy,
     name="check_price_alerts",
-    description="Monitors crypto prices and alerts on significant changes (>5% by default)"
+    description="Monitors crypto prices and alerts on significant changes (>0.1% by default)"
 )
 
 # Schedule price checks
 def schedule_alerts():
     scheduler = BackgroundScheduler()
     scheduler.add_job(lambda: user_proxy.initiate_chat(alert_agent, message=f"Check alerts for BTC"),
-                     'interval', minutes=5)
+                     'interval', minutes=1)
     scheduler.start()
 
 if __name__ == "__main__":
