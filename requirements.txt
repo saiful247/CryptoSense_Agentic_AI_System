@@ -6,6 +6,10 @@ fastapi>=0.100.0
 uvicorn>=0.23.0
 python-multipart
 python-dotenv
+matplotlib
+pandas
+numpy
+requests
 langgraph
 yfinance
 python-jose[cryptography]
