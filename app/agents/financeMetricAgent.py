@@ -14,11 +14,8 @@ def get_finance_metrics():
         coin_ticker = yf.Ticker(ticker)
 
         # Get last 5 years daily data
-        coin_hist = coin_ticker.history(period="5y", interval="1d")
-
-        # current price with datetime
-        current_price = coin_hist["Close"].iloc[-1]
-        print(f"Current price of {coinSymbol}: ", current_price)
+        coin_hist = coin_ticker.history(period="1y", interval="1d")
+        print(coin_hist.head())
 
         start_price = coin_hist["Close"].iloc[0]
         end_price = coin_hist["Close"].iloc[-1]
