@@ -6,3 +6,9 @@ fastapi>=0.100.0
 uvicorn>=0.23.0
 python-multipart
 python-dotenv
+langgraph
+yfinance
+python-jose[cryptography]
+passlib[bcrypt]
+google-cloud-firestore
+python-dotenv

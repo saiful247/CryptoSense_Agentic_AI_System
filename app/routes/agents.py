@@ -1,7 +1,8 @@
 import json
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Request, status, Depends
 from app.agents.graphDownloadAgent import getCryptoStats
 from app.agents.cryptoPriceAgent import getCoinPriceData
+from app.auth.auth import get_current_user
 
 from app.schemas.schemas import CryptoAdvicerResponse, UserRequest, CryptoAdvice, EstimatedReturns
 from app.agents.graph import build_graph
@@ -12,7 +13,7 @@ graph_executor = build_graph()
 
 
 @router.post("/get-finance-advice")
-async def get_finance_advice(request: UserRequest):
+async def get_finance_advice(request: UserRequest, current_user: dict = Depends(get_current_user)):
     print("***Entering to get get-finance-advice...***")
     state = {"input": request.dict()}
 
