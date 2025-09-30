@@ -66,6 +66,11 @@ def getFinalAdvice():
 
         {{
             "coinSymbol": "{coinSymbol}",
+            "current_price"{{
+                "Binance": {binance_as_platform.get("current_price", "")},
+                "Coinbase": {coinbase_as_platform.get("current_price", "")},
+                "cheaper_platform": "Binance or Coinbase based on current price"
+            }},
             "final_advice": "Your concise final advice here.",
             "investment_advice": {{
                 "should_invest": "Yes or No",
@@ -75,7 +80,6 @@ def getFinalAdvice():
                 "platform_name": "Binance or Coinbase",
                 "reason": "Concise reason for recommendation based on platform selection metrics."
             }},
-            "estimated_return_usd": "Estimated return in USD over the investment duration",
             "risk_assessment": "Concise risk assessment based on volatility and max drawdown"
         }}
 
