@@ -1,12 +1,12 @@
-ag2[gemini]
-autogen-agentchat[gemini]~=0.2
-google-genai
-google-generativeai
+# ag2[gemini]
+# autogen-agentchat[gemini]~=0.2
+# google-genai
+# google-generativeai
 fastapi>=0.100.0
 uvicorn>=0.23.0
 python-multipart
 python-dotenv
-matplotlib
+pydantic[email]
 pandas
 numpy
 requests
@@ -16,3 +16,6 @@ python-jose[cryptography]
 passlib[bcrypt]
 google-cloud-firestore
 python-dotenv
+google-cloud-aiplatform
+google-auth
+

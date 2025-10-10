@@ -1,14 +1,14 @@
 from langgraph.graph import StateGraph
 from typing import TypedDict
 
-from app.agents.coinNameToSymbolAgent import getCoinSymbol
-from app.agents.financeMetricAgent import get_finance_metrics
-from app.agents.platformSelectionAgent import get_platform_selection
-from app.agents.final_advice_agent import getFinalAdvice
-from app.agents.finalReturnAmountAgent import estimate_crypto_return_with_csv
+from app.agents.crypto_advisor_agents.coinNameToSymbolAgent import getCoinSymbol
+from app.agents.crypto_advisor_agents.financeMetricAgent import get_finance_metrics
+from app.agents.crypto_advisor_agents.platformSelectionAgent import get_platform_selection
+from app.agents.crypto_advisor_agents.final_advice_agent import getFinalAdvice
+from app.agents.crypto_advisor_agents.finalReturnAmountAgent import estimate_crypto_return_with_csv
 
 
-from app.schemas.schemas import FinanceMetrics, ExchangeComparison, UserRequest, CryptoAdvice
+from app.schemas.schemas import UserRequest
 
 
 class GraphState(TypedDict):

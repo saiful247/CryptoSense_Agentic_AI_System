@@ -1,17 +1,34 @@
 import re
 import os
 from dotenv import load_dotenv
-import pandas as pd
 import json
 
 from app.schemas.schemas import CryptoAdvice
-from google import genai
+
+from google.oauth2 import service_account
+from vertexai.generative_models import GenerativeModel, Part
+import vertexai
 
 load_dotenv()
 
+project_id = os.getenv("PROJECT_ID")
+location = os.getenv("LOCATION")
+
+
+if os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
+    credentials = service_account.Credentials.from_service_account_file(
+        os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    )
+else:
+    raise ValueError("Missing GOOGLE_APPLICATION_CREDENTIALS in .env")
+
+# Initialize Vertex AI
+vertexai.init(project=project_id, location=location, credentials=credentials)
+
+model = GenerativeModel("gemini-2.5-flash")
+
 
 def getFinalAdvice():
-    gemini_client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     def get_advice_function(state):
         print("Entering Final Advice Agent with state: ", state)
@@ -87,12 +104,9 @@ def getFinalAdvice():
 
         try:
             print("Calling Gemini API with prompt:")
-            response = gemini_client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=instruction,
-            )
+            response = model.generate_content(instruction)
 
-            content = response.text
+            content = response.text.strip()
             print(content)
 
             print("Gemini API response received.")

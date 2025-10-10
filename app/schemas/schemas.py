@@ -86,3 +86,35 @@ class EstimatedReturns(BaseModel):
 class CryptoAdvicerResponse(BaseModel):
     advice: CryptoAdvice
     estimated_returns: EstimatedReturns
+
+
+# NFT
+class NFTRequest(BaseModel):
+    userPrompt: str
+    nftName: str
+    nftCollectionName: str
+    socialMediaPlatform: str
+
+
+class NFTAttribute(BaseModel):
+    trait_type: str
+    value: str
+
+
+class NFTMetadata(BaseModel):
+    name: str
+    description: str
+    image: str
+    attributes: List[NFTAttribute]
+
+
+class NFTMarketingContent(BaseModel):
+    tagline: str
+    promotional_post: str
+
+
+class NFTResponse(BaseModel):
+    nftPrompt: str
+    nftURL: str
+    nftMetaData: NFTMetadata
+    nftSocialMediaPost: NFTMarketingContent

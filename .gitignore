@@ -1,4 +1,5 @@
 /venv/
+/newvenv/
 .env
 
 /00z/
@@ -7,3 +8,5 @@
 
 /testFiles/
 /cryptoGraph/
+
+/keys/

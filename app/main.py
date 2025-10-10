@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.agents import router
 from app.routes import users
+from app.routes.nft_agents import router as nft_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -21,6 +22,7 @@ app.add_middleware(
 # Include routers
 app.include_router(router, prefix="/api")
 app.include_router(users.router)
+app.include_router(nft_router)
 
 # Root endpoint
 
@@ -39,7 +41,7 @@ if __name__ == "__main__":
     load_dotenv()
 
     # Get host and port from environment variables
-    host = os.getenv("HOST", "127.0.0.1")
-    port = int(os.getenv("PORT", 8000))
+    host = os.getenv("HOST")
+    port = int(os.getenv("PORT"))
 
     uvicorn.run("app.main:app", host=host, port=port, reload=True)
