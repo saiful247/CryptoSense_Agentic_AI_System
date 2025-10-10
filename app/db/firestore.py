@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Set credentials and project ID from environment variables
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv(
-    "GOOGLE_APPLICATION_CREDENTIALS")
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv(
+#     "GOOGLE_APPLICATION_CREDENTIALS")
 project_id = os.getenv("FIRESTORE_PROJECT_ID")
 db_name = os.getenv("FIRESTORE_DATABASE_NAME", "irwa-crypto-agent-user")
 

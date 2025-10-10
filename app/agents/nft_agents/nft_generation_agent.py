@@ -16,10 +16,11 @@ project_id = os.getenv("PROJECT_ID")
 location = os.getenv("LOCATION")
 
 
-if os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
-    credentials = service_account.Credentials.from_service_account_file(
-        os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-    )
+# if os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
+#     credentials = service_account.Credentials.from_service_account_file(
+#         os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+#     )
+credentials = None
 
 # Initialize Vertex AI
 vertexai.init(project=project_id, location=location, credentials=credentials)

@@ -15,12 +15,13 @@ load_dotenv()
 project_id = os.getenv("PROJECT_ID")
 location = os.getenv("LOCATION")
 
-if os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
-    credentials = service_account.Credentials.from_service_account_file(
-        os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-    )
-else:
-    raise ValueError("Missing GOOGLE_APPLICATION_CREDENTIALS in .env")
+# if os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
+#     credentials = service_account.Credentials.from_service_account_file(
+#         os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+#     )
+# else:
+#     raise ValueError("Missing GOOGLE_APPLICATION_CREDENTIALS in .env")
+credentials = None
 
 vertexai.init(project=project_id, location=location, credentials=credentials)
 
