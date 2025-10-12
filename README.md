@@ -85,6 +85,38 @@ The application will be available at `http://127.0.0.1:8000`.
 
 ## Resources
 
-- [Autogen Code Executors](https://microsoft.github.io/autogen/0.2/docs/tutorial/code-executors/)
-- [Autogen with Google Gemini](https://microsoft.github.io/autogen/0.2/docs/topics/non-openai-models/cloud-gemini_vertexai/)
-- [Autogen Tool Usage](https://microsoft.github.io/autogen/0.2/docs/tutorial/tool-use/)
+---
+
+## Docker & Deployment
+
+### Docker Commands
+
+```powershell
+# Build the Docker image
+docker build -t cryptoagent-app .
+
+# Run the container (mount keys, set env file, expose port)
+docker run -d --name cryptoagent-container -p 8000:8000 -v "/e/IRWA/Project/CryptoAgent/keys:/app/keys:ro" --env-file .env cryptoagent-app
+
+# Stop and remove the container
+docker stop cryptoagent-container
+docker rm cryptoagent-container
+
+# View container logs
+docker logs -f cryptoagent-container
+```
+
+### Deployment (GCP Cloud Run)
+
+- Deployed via GitHub repo branch with Dockerfile.
+- Faced build errors due to `GOOGLE_APPLICATION_CREDENTIALS` usage for Firestore/Vertex AI.
+
+#### Other Issues & Tips
+
+- In `.env`, do **not** wrap values (like `GOOGLE_APPLICATION_CREDENTIALS`, `ALGORITHM`, API keys) in double quotes (`""`). This causes Docker build issues.
+- Keep your Dockerfile as simple as possible.
+- If deployment fails, check Cloud Run logs for details.
+
+#### Migration Note
+
+- Migrated from Autogen to Vertex AI for broader use cases and model variety. Vertex AI is easier to use for multiple models and scenarios. Autogen is best for chat-like applications, but Vertex AI better fits project needs.
