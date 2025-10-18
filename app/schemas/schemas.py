@@ -118,3 +118,11 @@ class NFTResponse(BaseModel):
     nftURL: str
     nftMetaData: NFTMetadata
     nftSocialMediaPost: NFTMarketingContent
+
+
+class NewsRequest(BaseModel):
+    query: str
+
+
+class PortfolioRequest(BaseModel):
+    holdings: Dict[str, float]

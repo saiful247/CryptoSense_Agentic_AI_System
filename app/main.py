@@ -4,6 +4,8 @@ from app.routes.agents import router
 from app.routes import users
 from app.routes.nft_agents import router as nft_router
 
+from app.routes.news_portfolio_agents import router as news_router
+
 # Initialize FastAPI app
 app = FastAPI(
     title="Crypto Agent API",
@@ -24,6 +26,7 @@ app.add_middleware(
 app.include_router(router, prefix="/api")
 app.include_router(users.router)
 app.include_router(nft_router)
+app.include_router(news_router)
 
 # Root endpoint
 
