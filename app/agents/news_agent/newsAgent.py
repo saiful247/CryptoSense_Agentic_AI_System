@@ -1,23 +1,33 @@
-import os, re, json, requests
+import os
+import re
+import json
+import requests
 from datetime import datetime
 from dotenv import load_dotenv
 import google.generativeai as genai
 
+# ──────────────────────────────────────────────
+# Environment setup
+# ──────────────────────────────────────────────
 load_dotenv()
 
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-pro-latest")  # ✅ Stable model version
+model = genai.GenerativeModel("models/gemini-2.0-flash")
 
-
-def run_news_agent(query: str):
-    """Fetch and summarize recent crypto news using Tavily + Gemini."""
+# ──────────────────────────────────────────────
+# Core Tool
+# ──────────────────────────────────────────────
+def cryptoNewsTool(query: str):
+    """
+    Fetch and summarize recent cryptocurrency news using Tavily + Gemini.
+    """
     if not TAVILY_API_KEY:
-        return {"error": "Missing TAVILY_API_KEY in .env"}
+        return {"error": "TAVILY_API_KEY missing in .env"}
 
-    # Step 1️⃣ — Fetch news from Tavily API
+    # Step 1: Fetch news from Tavily
     url = "https://api.tavily.com/search"
     payload = {
         "api_key": TAVILY_API_KEY,
@@ -32,26 +42,27 @@ def run_news_agent(query: str):
         resp.raise_for_status()
         results = resp.json().get("results", [])
     except Exception as e:
-        return {"error": f"Tavily API error: {str(e)}"}
+        return {"error": f"Tavily API error: {e}"}
 
     if not results:
-        return {"error": f"No news found for '{query}'."}
+        return {"error": f"No news found for '{query}'"}
 
+    # Step 2: Format the news
     news_items = [{"title": r.get("title"), "url": r.get("url")} for r in results if r.get("title")]
     headlines_text = "\n".join([f"- {n['title']}" for n in news_items])
 
-    # Step 2️⃣ — Ask Gemini for structured summary
+    # Step 3: Ask Gemini for analysis
     prompt = f"""
-    Summarize the following cryptocurrency news headlines for "{query}".
+    Summarize the following cryptocurrency news headlines for '{query}'.
 
     Headlines:
     {headlines_text}
 
     Return ONLY valid JSON with:
     {{
-      "key_themes": ["Theme1", "Theme2"],
-      "summary": "4-6 sentence summary",
-      "sentiment": "Positive" | "Negative" | "Neutral"
+        "key_themes": ["theme1", "theme2"],
+        "summary": "4–6 sentence overview of the market sentiment.",
+        "sentiment": "Positive" or "Negative" or "Neutral"
     }}
     """
 
@@ -62,7 +73,7 @@ def run_news_agent(query: str):
         cleaned = re.sub(r"^```(?:json)?|```$", "", text, flags=re.MULTILINE).strip()
         parsed = json.loads(cleaned)
     except Exception as e:
-        parsed = {"summary": f"Gemini API error: {str(e)}"}
+        parsed = {"summary": f"Gemini summarization error: {e}"}
 
     return {
         "topic": query,
@@ -72,3 +83,17 @@ def run_news_agent(query: str):
         "sentiment": parsed.get("sentiment", "Neutral"),
         "timestamp": datetime.utcnow().isoformat(),
     }
+
+# ──────────────────────────────────────────────
+# Runner function for route integration
+# ──────────────────────────────────────────────
+def run_news_agent(query: str):
+    """
+    Wrapper function used by FastAPI route.
+    Handles validation and calls cryptoNewsTool().
+    """
+    if not query or not isinstance(query, str):
+        return {"error": "Invalid or missing query parameter."}
+
+    result = cryptoNewsTool(query)
+    return {"news_report": result}
