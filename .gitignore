@@ -10,3 +10,9 @@
 /cryptoGraph/
 
 /keys/
+
+# virtual environments
+.venv/
+.venv*/
+.venv312/
+venv/

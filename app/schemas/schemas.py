@@ -1,4 +1,4 @@
-from typing import Dict, List, TypedDict
+from typing import Dict, List, TypedDict, Optional
 from pydantic import BaseModel
 
 
@@ -118,3 +118,22 @@ class NFTResponse(BaseModel):
     nftURL: str
     nftMetaData: NFTMetadata
     nftSocialMediaPost: NFTMarketingContent
+
+
+class RiskCheckIn(BaseModel):
+    url: Optional[str] = Field(None, description="URL to screen for phishing")
+    symbol: Optional[str] = Field(None, description="Token symbol, e.g., PEPE")
+    address: Optional[str] = Field(None, description="EVM contract address")
+    blurb: Optional[str] = Field(None, description="Optional marketing text to check")
+
+class LearnIn(BaseModel):
+    topic: str
+    level: str = Field("Beginner", description="Beginner | Intermediate | Advanced")
+    examples: bool = True
+
+class BlockchainIn(BaseModel):
+    address: str = Field(..., description="EVM contract/token address (0x...)")
+
+class AdvisorIn(BaseModel):
+    riskguard: Dict[str, Any] = Field(default_factory=dict, description="RiskGuard structured result")
+    blockchain: Dict[str, Any] = Field(default_factory=dict, description="BlockchainAgent structured result")

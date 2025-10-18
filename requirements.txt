@@ -16,6 +16,14 @@ python-jose[cryptography]
 passlib[bcrypt]
 google-cloud-firestore
 python-dotenv
-google-cloud-aiplatform
+#google-cloud-aiplatform
 google-auth
 
+#iqra
+autogen
+google-generativeai
+requests
+web3==7.13.0
+chromadb==1.1.1
+sentence-transformers==5.1.0
+faiss-cpu==1.11.0.post1

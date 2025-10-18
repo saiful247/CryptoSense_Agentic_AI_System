@@ -21,9 +21,14 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(router, prefix="/api")
+#app.include_router(router, prefix="/api")
 app.include_router(users.router)
-app.include_router(nft_router)
+#app.include_router(nft_router)
+app.include_router(risk.router)        # includes /risk/check + /risk/health/* + /risk/debug/*
+app.include_router(learn.router)       # /learn/explain
+app.include_router(blockchain.router)  # /blockchain/analyze
+app.include_router(advisor.router)  
+
 
 # Root endpoint
 
