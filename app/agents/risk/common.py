@@ -1,10 +1,24 @@
 import os
 from dotenv import load_dotenv
+import vertexai
+from vertexai.generative_models import GenerativeModel
 
 load_dotenv()
 
+project_id = os.getenv("PROJECT_ID")
+location = os.getenv("LOCATION")
+
+credentials = None
+
+# Initialize Vertex AI
+vertexai.init(project=project_id, location=location, credentials=credentials)
+
+
+model = GenerativeModel("gemini-2.5-flash")
+
+
 AUTOGEN_CONFIG_LIST = [{
-    "model": "gemini-2.5-flash",
+    "model": model,
     "api_type": "google",
     "api_key": os.environ.get("GEMINI_API_KEY", ""),
 }]
