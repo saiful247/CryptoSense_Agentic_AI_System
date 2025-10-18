@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routes.agents import router
 from app.routes import users
 from app.routes.nft_agents import router as nft_router
+from app.routes.portfolio_agent import router as portfolio_router
+from app.routes.news_agent import router as news_router
+
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -24,6 +27,9 @@ app.add_middleware(
 app.include_router(router, prefix="/api")
 app.include_router(users.router)
 app.include_router(nft_router)
+
+app.include_router(portfolio_router)
+app.include_router(news_router)
 
 # Root endpoint
 
