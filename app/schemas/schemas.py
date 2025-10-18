@@ -1,5 +1,5 @@
-from typing import Dict, List, TypedDict
-from pydantic import BaseModel
+from typing import Dict, List, TypedDict, Optional, Tuple
+from pydantic import BaseModel, Field
 
 
 class UserRequest(BaseModel):
@@ -126,3 +126,18 @@ class NewsRequest(BaseModel):
 
 class PortfolioRequest(BaseModel):
     holdings: Dict[str, float]
+
+
+class AdviseRequest(BaseModel):
+    coin: str = Field(..., description="Token symbol, e.g., SOL/BTC/ETH/USDC")
+    amount_usd: Optional[float] = Field(
+        None, description="Optional amount for projection")
+    start_date: Optional[str] = Field(
+        None, description="dd/mm/yyyy (optional)")
+    duration_months: Optional[int] = Field(
+        3, description="Investment duration in months")
+    risk: Optional[str] = Field("low", pattern="^(low|medium|high)$")
+    chain: Optional[str] = Field("Polygon")
+    min_tvl_usd: Optional[float] = Field(1_000_000)
+    include_rewards: Optional[bool] = Field(True)
+    compare_protocols: Optional[Tuple[str, str]] = Field(("aave", "compound"))
