@@ -111,7 +111,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         expires_delta=access_token_expires
     )
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer", "user_id": user["user_id"]}
 
 
 @router.post("/login", response_model=Token)
@@ -144,7 +144,7 @@ async def login(user_data: UserLogin):
         expires_delta=access_token_expires
     )
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer", "user_id": user["user_id"]}
 
 
 @router.get("/me", response_model=UserResponse)
