@@ -1,11 +1,13 @@
 from google.oauth2 import service_account
-from vertexai.generative_models import GenerativeModel, Part
+from vertexai.generative_models import GenerativeModel
 import vertexai
 import re
 import os
 from dotenv import load_dotenv
 import pandas as pd
 import json
+
+from app.agents.safty_functions.sanitize import sanitize_user_prompt
 
 load_dotenv()
 
@@ -30,7 +32,8 @@ model = GenerativeModel("gemini-2.5-flash")
 
 def nftPromptPreprocess():
     def nft_prompt_preprocess_function(state):
-        userPrompt = state["input"]["userPrompt"]
+        # userPrompt = state["input"]["userPrompt"]
+        userPrompt = sanitize_user_prompt(state["input"]["userPrompt"])
         print("Prompt: ", userPrompt)
 
         instruction = f"""
