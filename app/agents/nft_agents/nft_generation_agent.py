@@ -14,6 +14,7 @@ load_dotenv()
 
 project_id = os.getenv("PROJECT_ID")
 location = os.getenv("LOCATION")
+bucket_name = os.getenv("GCP_BUCKET_NAME")
 
 
 # if os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
@@ -25,7 +26,6 @@ credentials = None
 # Initialize Vertex AI
 vertexai.init(project=project_id, location=location, credentials=credentials)
 
-# Use Imagen 2
 model = ImageGenerationModel.from_pretrained("imagen-4.0-generate-001")
 
 
@@ -47,7 +47,6 @@ def generateNftImage():
         # for idx, image in enumerate(result.images):
         #     image.save(f"nft_art_{idx}.png")
 
-        bucket_name = "crypto-agent-irwa"
         blob_name = f"nft_images/{nftCollectionName}_{nftName}_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.png"
 
         storage_client = storage.Client()
