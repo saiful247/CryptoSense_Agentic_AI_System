@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 def estimate_crypto_return_with_csv():
     def estimate_crypto_return_with_csv_function(
         state,
-        csv_path: str = "https://storage.googleapis.com/crypto-agent-irwa/InflationrateUS/avarageMonthlyInflationRate.csv"
+        csv_path: str = "https:avarageMonthlyInflationRate.csv"
     ):
         print("Entering estimate_crypto_return_with_csv_function...State: ", state)
         finance_metrics = state["finance_metrics"]
