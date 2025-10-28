@@ -47,7 +47,7 @@ def generateNftImage():
         # for idx, image in enumerate(result.images):
         #     image.save(f"nft_art_{idx}.png")
 
-        bucket_name = "crypto-agent-irwa"
+        bucket_name = "xxxx"
         blob_name = f"nft_images/{nftCollectionName}_{nftName}_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.png"
 
         storage_client = storage.Client()
